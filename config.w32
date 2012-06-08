@@ -1,0 +1,5 @@
+ARG_ENABLE("extmethod", "enable extmethod support", "no");
+
+if (PHP_SKEL != "no") {
+   EXTENSION("extmethod", "extmethod.c");
+}
