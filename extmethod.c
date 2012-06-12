@@ -244,6 +244,10 @@ ZEND_FUNCTION(extmethod_factory)
     }
 
     /* Exsists class method */
+    if (!method || method_len <= 0) {
+        zend_error(E_WARNING, "Cannot empty method name");
+        RETURN_FALSE;
+    }
     lcname = zend_str_tolower_dup(method, method_len);
     if (zend_hash_exists(&ce->function_table, lcname, method_len + 1)) {
         method_exsits = 1;
