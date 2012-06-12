@@ -47,7 +47,7 @@ static inline void _extmethod_data_destroy(extmethod_data_t **data)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_extmethod_intern, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_extmethod_factory, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_extmethod_factory, 0, 0, 2)
     ZEND_ARG_INFO(0, class)
     ZEND_ARG_INFO(0, method)
     ZEND_ARG_INFO(0, function)
@@ -211,7 +211,7 @@ ZEND_FUNCTION(extmethod_intern)
 
 ZEND_FUNCTION(extmethod_factory)
 {
-    zval *class, *function, *flags = NULL;
+    zval *class, *function = NULL, *flags = NULL;
     char *method, *lcname;
     int method_len;
     zend_class_entry *ce = NULL, **pce;
@@ -220,7 +220,7 @@ ZEND_FUNCTION(extmethod_factory)
     smart_str key = {0};
 
     if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC,
-                              "zsz|z", &class, &method, &method_len,
+                              "zs|zz", &class, &method, &method_len,
                               &function, &flags) == FAILURE) {
         RETURN_FALSE;
     }
@@ -248,6 +248,70 @@ ZEND_FUNCTION(extmethod_factory)
         zend_error(E_WARNING, "Cannot empty method name");
         RETURN_FALSE;
     }
+
+    /* Trait insert */
+    if (function == NULL) {
+#if ZEND_MODULE_API_NO >= 20100525
+        zend_class_entry *trait_ce = NULL, **trait_pce;
+
+        if (zend_lookup_class(method, method_len,
+                              &trait_pce TSRMLS_CC) != SUCCESS ||
+            (((*trait_pce)->ce_flags & ZEND_ACC_TRAIT)
+             <= ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
+            zend_error(E_WARNING, "Trait %s not found", method);
+            RETURN_FALSE;
+        }
+
+        trait_ce = *trait_pce;
+
+        HashPosition pos;
+        zend_function *fn;
+
+        zend_hash_internal_pointer_reset_ex(&trait_ce->function_table, &pos);
+
+        while (zend_hash_get_current_data_ex(&trait_ce->function_table,
+                                             (void **)&fn, &pos) == SUCCESS) {
+            char *key;
+            uint key_len;
+            ulong num_index;
+            uint len = strlen(fn->common.function_name);
+
+            if ((fn->common.fn_flags & ZEND_ACC_CTOR) == 0 ||
+                fn->common.scope == trait_ce ||
+                zend_hash_get_current_key_ex(&trait_ce->function_table, &key,
+                                             &key_len, &num_index, 0,
+                                             &pos) != HASH_KEY_IS_STRING ||
+                zend_binary_strcasecmp(key, key_len-1,
+                                       fn->common.function_name, len) == 0) {
+                lcname = zend_str_tolower_dup(fn->common.function_name, len);
+                if (zend_hash_exists(&ce->function_table, lcname, len + 1)) {
+                    zend_error(E_WARNING, "%s::%s() is exsits",
+                               ce->name, fn->common.function_name);
+                } else {
+                    zend_function new_method;
+
+                    new_method = *fn;
+                    new_method.common.scope = ce;
+                    function_add_ref(&new_method);
+
+                    if (zend_hash_update(&ce->function_table, lcname, len+1,
+                                         &new_method, sizeof(zend_function),
+                                         NULL) != SUCCESS) {
+                        zend_error(E_WARNING, "Faild to add %s::%s()",
+                                   ce->name, fn->common.function_name);
+                    }
+                }
+                efree(lcname);
+            }
+            zend_hash_move_forward_ex(&trait_ce->function_table, &pos);
+        }
+        RETURN_TRUE;
+#else
+        zend_error(E_WARNING, "Cannot empty function");
+        RETURN_FALSE;
+#endif
+    }
+
     lcname = zend_str_tolower_dup(method, method_len);
     if (zend_hash_exists(&ce->function_table, lcname, method_len + 1)) {
         method_exsits = 1;

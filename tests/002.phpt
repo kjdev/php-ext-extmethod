@@ -11,13 +11,13 @@ var_dump(extmethod_factory('Test'));
 
 class Test {}
 var_dump(extmethod_factory('Test'));
-var_dump(extmethod_factory('Test', 'test'));
+//var_dump(extmethod_factory('Test', 'test'));
 var_dump(extmethod_factory('Test', null));
 var_dump(extmethod_factory('Test', array()));
 var_dump(extmethod_factory('Test', new stdClass));
 
 var_dump(extmethod_factory(new Test));
-var_dump(extmethod_factory(new Test, 'test'));
+//var_dump(extmethod_factory(new Test, 'test'));
 var_dump(extmethod_factory(new Test, null));
 var_dump(extmethod_factory(new Test, array()));
 var_dump(extmethod_factory(new Test, new stdClass));
@@ -39,40 +39,34 @@ var_dump(extmethod_factory(new Test, 'test', new stdClass));
 
 ?>
 --EXPECTF--
-Warning: extmethod_factory() expects at least 3 parameters, 0 given in %s002.php on line %d
+Warning: extmethod_factory() expects at least 2 parameters, 0 given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 1 given in %s002.php on line %d
+Warning: extmethod_factory() expects at least 2 parameters, 1 given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 1 given in %s002.php on line %d
+Warning: extmethod_factory() expects at least 2 parameters, 1 given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
+Warning: Cannot empty method name in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
+Warning: extmethod_factory() expects parameter 2 to be string, array given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
+Warning: extmethod_factory() expects parameter 2 to be string, object given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
+Warning: extmethod_factory() expects at least 2 parameters, 1 given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 1 given in %s002.php on line %d
+Warning: Cannot empty method name in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
+Warning: extmethod_factory() expects parameter 2 to be string, array given in %s002.php on line %d
 bool(false)
 
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
-bool(false)
-
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
-bool(false)
-
-Warning: extmethod_factory() expects at least 3 parameters, 2 given in %s002.php on line %d
+Warning: extmethod_factory() expects parameter 2 to be string, object given in %s002.php on line %d
 bool(false)
 
 Warning: function does not closure object in %s002.php on line %d

@@ -17,7 +17,7 @@ extmethod.ini:
 
 ## Function ##
 
-bool extmethod_factory( mixed $object, string $method, Closure $closure [, int $flags = EXTMETHOD_PUBLIC ] )
+bool extmethod_factory( mixed $object, string $method, [, Closure $closure, int $flags = EXTMETHOD_PUBLIC ] )
 
 ### parameters ###
 
@@ -27,7 +27,7 @@ object:
 
 method:
 
-    The method name
+    The method name or trait name
 
 closure:
 
@@ -53,3 +53,9 @@ Returns TRUE if the method succeeded in adding, FALSE otherwise.
     extmethod_factory('Test', 'test', function() { echo "test\n"; });
 
     (new Test)->test();
+
+    //trait : PHP 5.4
+    trait Hello { public function sayHello() { echo "hello\n"; } }
+    extmethod_factory('Test', 'Hello');
+
+    (new Test)->sayHello();
